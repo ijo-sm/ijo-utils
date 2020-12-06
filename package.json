@@ -1,0 +1,16 @@
+{
+  "name": "ijo-utils",
+  "version": "0.0.1",
+  "description": "A set of utilities for IJO.",
+  "main": "./src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ijo-sm/ijo-utils.git"
+  },
+  "author": "ijo-sm",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ijo-sm/ijo-utils/issues"
+  },
+  "homepage": "https://github.com/ijo-sm/ijo-utils#readme"
+}
