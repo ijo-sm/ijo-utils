@@ -1,5 +1,5 @@
 const fs = require("fs");
-const FSUtils = require("./fsUtils");
+const FSUtils = require("./fs");
 
 /**
  * This is utility for managing a configuration file.
