@@ -12,9 +12,9 @@ const colors = {
 
 /**
  * The `Logger` class is used to keep track of events when debugging IJO.
- * There are different levels of logs which each have there own function. 
+ * There are different types of logs which each have there own function. 
  * 
- * ### Log Levels
+ * ### Log Types
  * 
  * - `info` - Simple information reflecting normal behaviour. Events such as the start and stop of services are included
  * - `debug` (optional) - More granular information about the events taking place in the running enviroment
@@ -26,20 +26,29 @@ const colors = {
 class Logger {
   /**
    * Create a new logging instance
+   * 
+   * ### Logging Level
+   * 
+   * `0` - logs `info`, `warn`, `error`, and `fatal`. Usage for production
+   * `1` - logs all in `0` and `debug`. Used for basic debugging
+   * `2` - logs all in `1` and `trace`. Used to see every detail logged for advanced debugging
+   * 
    * @param {string} name Name of the log
-   * @param {string} path Path of file to write log (should be in the ./logs directory)
-   * @param {boolean} debug If the log should accept debug messages
-   * @param {boolean} trace If the log should accept trace messages
+   * @param {number} log_level The level of logging accepted, see above
    */
-  constructor(name, path, debug=false, trace=false) {
+  constructor(name, log_level) {
+    this.cache = "";
     this.name = name;
+    if (log_level < 0 || log_level > 2) throw Error(`Log level of '${log_level}' not accepted; must be 0, 1, or 2`);
+  }
+
+  /**
+   * Initialize the log with a path
+   * @param {string} path Path of file to write log (should be in the ./logs/ directory)
+   */
+  initialize(path) {
     this.path = path;
-    this._debug = debug;
-    this._trace = trace;
-    fs.writeFile(path, "", "utf8", err => {
-      if (err) throw Error(`${this.name} failed to write data to log: ${this.path}`)
-    });
-    this.debug("Created log");
+    this.info(`Log '${this.name}' initialized at ${path}`);
   }
 
   /**
@@ -47,8 +56,9 @@ class Logger {
    * @param {string} msg Message to write to file
    */
   async write(msg) {
-    fs.appendFile(this.path, `[${this.timestamp()}] ${msg}\n`, "utf8", err => {
-      if (err) throw Error(`${this.name} failed to write data to log: ${this.path}`)
+    this.cache += `[${this.timestamp()}] ${msg}\n`;
+    fs.writeFile(this.path, this.cache, "utf8", err => {
+      if (err && !this.path) throw Error(`${this.name} failed to write data to log: ${this.path}`) 
     });
   }
 
