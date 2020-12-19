@@ -48,7 +48,9 @@ class Logger {
    */
   initialize(path) {
     this.path = path;
-    this.info(`Log '${this.name}' initialized at ${path}`);
+    fs.writeFile(path, this.cache, "utf8", err => {
+      if (err) throw Error(`${this.name} failed to write data to log: ${this.path}`)
+    });
   }
 
   /**
@@ -56,8 +58,9 @@ class Logger {
    * @param {string} msg Message to write to file
    */
   async write(msg) {
-    this.cache += `[${this.timestamp()}] ${msg}\n`;
-    fs.writeFile(this.path, this.cache, "utf8", err => {
+    msg = `[${this.timestamp()}] ${msg}\n`;
+    this.cache += msg;
+    fs.appendFile(this.path, msg, "utf8", err => {
       if (err && !this.path) throw Error(`${this.name} failed to write data to log: ${this.path}`) 
     });
   }
