@@ -73,6 +73,16 @@ class Logger {
   }
 
   /**
+   * A timer that starts when called and returns a function that when invoked, 
+   *   stops the timer and returns the time passed in milliseconds
+   * @returns {function} function to call to stop the timer and get difference in milliseconds
+   */
+  timer() {
+    var timestart = performance.now();
+    return () => {return performance.now() - timestart}
+  }
+
+  /**
    * Log simple information
    * @param {string} message Message to log
    */
