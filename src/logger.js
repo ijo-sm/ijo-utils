@@ -109,7 +109,7 @@ class Logger {
    * @param {string} message Message to log
    */
   trace(message) {
-    if (!this.log_level < 2) return;
+    if (this.log_level < 2) return;
     message = `${this.name} trace: ${message}`;
     console.log(colors.trace + message + colors.reset);
     this.write(message);
