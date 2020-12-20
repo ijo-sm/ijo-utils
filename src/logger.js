@@ -40,6 +40,7 @@ class Logger {
     this.cache = "";
     this.name = name;
     if (log_level < 0 || log_level > 2) throw Error(`Log level of '${log_level}' not accepted; must be 0, 1, or 2`);
+    this.log_level = log_level;
   }
 
   /**
@@ -97,7 +98,7 @@ class Logger {
    * @param {string} message Message to log
    */
   debug(message) {
-    if (!this._debug) return;
+    if (this.log_level < 1) return;
     message = `${this.name} debug: ${message}`;
     console.log(colors.debug + message + colors.reset);
     this.write(message);
@@ -108,7 +109,7 @@ class Logger {
    * @param {string} message Message to log
    */
   trace(message) {
-    if (!this._trace) return;
+    if (!this.log_level < 2) return;
     message = `${this.name} trace: ${message}`;
     console.log(colors.trace + message + colors.reset);
     this.write(message);
