@@ -62,7 +62,7 @@ class Logger {
     msg = `[${this.timestamp()}] ${msg}\n`;
     this.cache += msg;
     fs.appendFile(this.path, msg, "utf8", err => {
-      if (err && !this.path) throw Error(`${this.name} failed to write data to log: ${this.path}`) 
+      if (err && this.path) throw Error(`${this.name} failed to write data to log: ${this.path}`) 
     });
   }
 
