@@ -39,12 +39,15 @@ class Logger {
      * @param {String} options.name Name of the log.
      * @param {String} options.folder The folder to place the log in. By default this is "./logs".
      * @param {number} options.logLevel The level of logging accepted, see above.
+     * @param {number} options.writeAfter Write after the size of the cache is larger than this number. By default this
+     * is 100.
      */
-    constructor({name, folder="./logs", logLevel = 0} = {}) {
+    constructor({name, folder="./logs", logLevel=0, writeAfter=100} = {}) {
         if (logLevel < 0 || logLevel > 2) throw Error(`Log level of '${logLevel}' not accepted; must be 0, 1, or 2`);
         this.name = name;
         this.folder = folder;
         this.logLevel = logLevel;
+        this.writeAfter = writeAfter;
         this.cache = [];
         this.initialized = false;
         this.writing = false;
@@ -57,12 +60,15 @@ class Logger {
      * @param {String} options.folder The folder to write the log to (by default is the ./logs/ directory).
      * @param {String} options.name The name of this log.
      * @param {number} options.logLevel The level of logging that will be included.
+     * @param {number} options.writeAfter Write after the size of the cache is larger than this number. By default this
+     * is 100.
      * @returns {Promise} A promise that resolves when the logger has been initialized.
      */
-    async initialize({folder=this.folder, name=this.name, logLevel=this.logLevel} = {}) {
+    async initialize({folder=this.folder, name=this.name, logLevel=this.logLevel, writeAfter=this.writeAfter} = {}) {
         this.folder = folder;
         this.name = name;
         this.logLevel = logLevel;
+        this.writeAfter = writeAfter;
         this.path = path.join(this.folder, `${this.name}-${this.time({includeHours: true, separator: "-"})}.log`);
 
         if (!FSUtils.exists(this.folder) || !await FSUtils.isFolder(this.folder)) {
@@ -94,18 +100,23 @@ class Logger {
         
         this.path = path.join(this.folder, `${this.name}-${this.time({includeHours: true, separator: "-"})}.log`);
 
-        await this.writeCache({path});
+        await this.writeCache(path, {force: true});
     }
 
     /**
      * Writes all the logs that are still in cache to the file at the specified path. Ifter writing this asynchronously
      * there are more logs these will be written too. This ensures that the logs will be written in the correct order.
      * @param {String} path The path to write the cache to. By default this is the path set at this.path. 
+     * @param {Object} options The options when writing cache.
+     * @param {boolean} options.force Forces the cache to be written.
      * @returns {Promise} A promise that resolves when all logs are written or when some other call is making sure they
      * are written. Don't depend on the logs being written after this is resolved.
      */
-    async writeCache(path = this.path) {
-        if (this.writing || path === undefined || this.cache.length === 0) return;
+    async writeCache(path = this.path, {force=false} = {}) {
+        if (this.writing || 
+            path === undefined || 
+            this.cache.length === 0 ||
+            (!force && this.cache.length <= this.writeAfter)) return;
 
         const text = this.cache.map(log => JSON.stringify(log)).join("\n") + "\n";
         
