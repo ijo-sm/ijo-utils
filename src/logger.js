@@ -59,10 +59,11 @@ class Logger {
    * @param {string} msg Message to write to file
    */
   async write(msg) {
+    if (!this.path) return;
     msg = `[${this.timestamp()}] ${msg}\n`;
     this.cache += msg;
     fs.appendFile(this.path, msg, "utf8", err => {
-      if (err && !this.path) throw Error(`${this.name} failed to write data to log: ${this.path}`) 
+      if (err) throw Error(`${this.name} failed to write data to log: ${this.path}`) 
     });
   }
 
@@ -109,7 +110,7 @@ class Logger {
    * @param {string} message Message to log
    */
   trace(message) {
-    if (!this.log_level < 2) return;
+    if (this.log_level < 2) return;
     message = `${this.name} trace: ${message}`;
     console.log(colors.trace + message + colors.reset);
     this.write(message);
