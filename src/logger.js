@@ -186,13 +186,15 @@ class Logger {
     /**
      * A timer that starts when called and returns a function that when invoked, stops the timer and returns the time 
      * passed as string.
-     * @returns {Function} A function to call to stop the timer and get difference in milliseconds
+     * @param {Object} options The options for the timer.
+     * @param {number} options.decimals The amount of decimal precision. By default there are three decimals.
+     * @returns {Function} A function to call to stop the timer and get difference in milliseconds.
      */
-    timer() {
+    timer({decimals=3} = {}) {
         const startTime = performance.now();
 
         return () => {
-            return `${performance.now() - startTime}ms`;
+            return `${(performance.now() - startTime).toFixed(decimals)}ms`;
         };
     }
 
