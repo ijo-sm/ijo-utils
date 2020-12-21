@@ -78,6 +78,36 @@ const readdir = path => {
 	});
 }
 
+/**
+ * Asynchronously writes the specified data to the specified path.
+ * @param {String} path The path to write to.
+ * @param {String|Buffer} data The data to write to the file.
+ * @returns {Promise} A promise that resolves when the data has been written.
+ */
+const write = (path, data) => {
+	return new Promise((resolve, reject) => {
+		fs.writeFile(path, data, err => {
+			if(err) reject(err);
+			else resolve();
+		});
+	});
+}
+
+/**
+ * Asynchronously appends the specified data to the specified path.
+ * @param {String} path The path to append to.
+ * @param {String|Buffer} data The data to append to the file.
+ * @returns {Promise} A promise that resolves when the data has been appended.
+ */
+const append = (path, data) => {
+	return new Promise((resolve, reject) => {
+		fs.appendFile(path, data, err => {
+			if(err) reject(err);
+			else resolve();
+		});
+	});
+}
+
 module.exports = {
-	stat, isFolder, createFolder, isFile, exists, readdir
+	stat, isFolder, createFolder, isFile, exists, readdir, write, append
 }
