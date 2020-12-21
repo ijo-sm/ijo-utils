@@ -1,4 +1,5 @@
 const fs = require("fs");
+const {performance} = require('perf_hooks');
 
 const colors = {
   info: "\x1b[32m",
