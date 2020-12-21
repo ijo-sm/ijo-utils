@@ -107,7 +107,7 @@ class Logger {
     async writeCache(path = this.path) {
         if (this.writing || path === undefined || this.cache.length === 0) return;
 
-        const text = this.cache.map(log => JSON.stringify(log)).join("\n");
+        const text = this.cache.map(log => JSON.stringify(log)).join("\n") + "\n";
         
         this.cache = [];
         this.writing = true;
@@ -172,9 +172,9 @@ class Logger {
      * Returns the time as string, 
      * @param {Object} options The options for the time string.
      * @param {boolean} includeHours If hours should be included at the start. This is set to false by default.
-     * @param {String} separator The separator between each part of the time. It is "-" by default.
+     * @param {String} separator The separator between each part of the time. It is ":" by default.
      */
-    time({includeHours=false, separator="-"} = {}) {
+    time({includeHours=false, separator=":"} = {}) {
         const date = new Date();
         const hours =  String(date.getHours()).padStart(2, "0");
         const minutes =  String(date.getMinutes()).padStart(2, "0");
