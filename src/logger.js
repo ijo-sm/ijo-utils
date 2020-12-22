@@ -89,7 +89,7 @@ class Logger {
     async close() {
         if(this.cache.length === 0 || this.writing) return;
         if(this.path) {
-            this.writeCache();
+            this.writeCache(this.path, {force: true});
 
             return;
         }
