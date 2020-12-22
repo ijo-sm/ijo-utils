@@ -235,7 +235,7 @@ class Logger {
      * @param {String} namespace The namespace.
      */
     trace(message, namespace) {
-        if (this.log_level < 2) return;
+        if (this.logLevel < 2) return;
 
         this.log(message, {level: "trace", namespace});
     }
