@@ -89,7 +89,7 @@ class Logger {
     async close() {
         if(this.cache.length === 0 || this.writing) return;
         if(this.path) {
-            this.writeCache();
+            this.writeCache(this.path, {force: true});
 
             return;
         }
@@ -235,7 +235,7 @@ class Logger {
      * @param {String} namespace The namespace.
      */
     trace(message, namespace) {
-        if (this.log_level < 2) return;
+        if (this.logLevel < 2) return;
 
         this.log(message, {level: "trace", namespace});
     }
