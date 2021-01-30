@@ -1,6 +1,6 @@
 const http = require("http");
 const util = require("util");
-const {URL} = require("url");
+const { URL } = require("url");
 const ApiRequest = require("./request");
 const ApiResponse = require("./response");
 
@@ -13,7 +13,7 @@ class ApiServer {
 	 * Registers a new path and matching method to the api. This path will then be checked when handling an incoming 
 	 * request. if the request matches this path and method it will call the method with a custom api request class, a 
 	 * custom api response class and the path data as arguments. The path data contains information about the url of 
-	 * the incoming request. The path may add arguments using ":NAME", which wille be included in the path data object. 
+	 * the incoming request. The path may add arguments using ":NAME", which will be included in the path data object. 
 	 * For example: the request "/user/123/rename" will be matched to the path "/user/:id/rename" and the path data 
 	 * will be: {id: 123}. When an asterisk is added to the end of the specified path the handler will match all 
 	 * requests that begin with the text before the asterisk. By default the method matches all incoming methods, 
@@ -24,6 +24,7 @@ class ApiServer {
 	 * @param {Function} callback The callback to register.
 	 */
 	register(path, method = "*", callback) {
+		this.log.trace(`Registered path '${path}' with method '${method}'`, "api");
 		this.stack.push({
 			path, method, callback
 		});
@@ -36,7 +37,7 @@ class ApiServer {
 	unregister(path) {
 		const handlerIndex = this.stack.findIndex(handler => handler.path === path);
 
-		if(handlerIndex < 0) return;
+		if (handlerIndex < 0) return;
 
 		this.stack.splice(handlerIndex);
 	}
@@ -44,11 +45,13 @@ class ApiServer {
 	/**
 	 * Initializes the api by creating the server and starting error handing.
 	 */
-	initialize() {
+	initialize(log) {
+		this.log = log;
 		this.server = http.createServer((req, res) => {
 			this.handle(req, res).catch(err => this.handleError(err));
 		});
 		this.server.on("error", err => this.handleError(err));
+		this.log.debug("Initialized API server", "api");
 	}
 
 	/**
@@ -63,17 +66,21 @@ class ApiServer {
 		const request = new ApiRequest(req);
 		const response = new ApiResponse(res);
 
-		for(let handler of this.stack) {
-			if(handler.method !== "*" && handler.method !== req.method) continue;
+		this.log.debug(`Client connected at ${url.pathname}`, "api");
+
+		for (let handler of this.stack) {
+			if (handler.method !== "*" && handler.method !== req.method) continue;
 
 			const pathData = this.parsePath(handler.path, url.pathname);
 
-			if(pathData === undefined) continue;
+			if (pathData === undefined) continue;
 
 			const canContinue = await handler.callback(request, response, pathData);
 
-			if(!canContinue) return;
+			if (!canContinue) return;
 		}
+
+		this.log.trace(`No handler for '${url.pathname}', returning 404`, "api");
 
 		res.statusCode = 404;
 		res.end();
@@ -92,18 +99,18 @@ class ApiServer {
 		const pathParts = path.split("/");
 		const data = {};
 
-		for(let i = 0; i < templateParts.length; i++) {
+		for (let i = 0; i < templateParts.length; i++) {
 			const templatePart = templateParts[i];
 			const pathPart = pathParts[i];
 
-			if(templatePart.startsWith(":")) {
-				if(pathPart === undefined) return;
+			if (templatePart.startsWith(":")) {
+				if (pathPart === undefined) return;
 				const key = templatePart.substring(1, templatePart.length);
 
 				data[key] = pathPart;
 			}
-			else if(templatePart === "*") return data;
-			else if(templatePart !== pathPart) return;
+			else if (templatePart === "*") return data;
+			else if (templatePart !== pathPart) return;
 		}
 
 		return data;
@@ -125,10 +132,10 @@ class ApiServer {
 	 * @param {Number} options.port The port to start on.
 	 * @returns {Promise} A promise that is resolved when the server has started.
 	 */
-	start({port} = {}) {
+	start({ port } = {}) {
 		return new Promise(resolve => {
-            this.server.listen({port}, () => resolve());
-        });
+			this.server.listen({ port }, () => resolve());
+		});
 	}
 
 	/**
@@ -137,11 +144,11 @@ class ApiServer {
 	 */
 	close() {
 		return new Promise((resolve, reject) => {
-            this.server.close(err => {
-                if(err) reject(err);
-                else resolve();
-            });
-        });
+			this.server.close(err => {
+				if (err) reject(err);
+				else resolve();
+			});
+		});
 	}
 }
 
